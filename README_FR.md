@@ -1,0 +1,57 @@
+# Kingdom Two Crowns — Archipelago
+
+Ce projet poursuit le [mod Archipelago original de Catalyss](https://github.com/Catalyss/Archipelago-Kingdom2Crown), créé pour une ancienne version de Kingdom Two Crowns. Cette version a été mise à jour pour Kingdom Two Crowns 2.4.3 avec l’aide de l’IA (ChatGPT/Codex). Chacun peut reprendre, forker et adapter le projet ; merci de conserver les mentions des composants tiers et de respecter les licences de ses dépendances.
+
+Intégration Archipelago pour **Kingdom Two Crowns**.
+
+## Configuration vérifiée
+
+- Kingdom Two Crowns **2.4.3**, Windows x64
+- Archipelago **0.6.8** (version minimale requise par cet APWorld)
+- Plugin du mod **0.3.2**
+- APWorld **0.3.1**
+- BepInEx **6.0.0-be.753**, Unity IL2CPP, Windows x64
+
+Cette version de BepInEx est celle testée avec le jeu. Son chargeur IL2CPP, son préchargeur et les outils de patch sont compris dans l’archive officielle : aucun patcher IL2CPP séparé n’est requis. Le patcher optionnel BepInEx Configuration Manager n’est pas nécessaire au mod.
+
+## Contenu du dépôt
+
+- `BepInEx/plugins/ArchipelagoRandomizer/` — plugin du mod et DLL dont il dépend.
+- `kingdomtwocrowns.apworld` — monde Archipelago à installer pour générer une partie en local.
+- `worlds/kingdomtwocrowns/` — sources de l’APWorld.
+- `src/Mod/` — sources du plugin BepInEx.
+
+## Installer BepInEx
+
+Télécharge l’archive exacte **Unity IL2CPP, Windows x64, build 753** :
+
+[`BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.753+0d275a4.zip`](https://builds.bepinex.dev/projects/bepinex_be/753/BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.753%2B0d275a4.zip)
+
+Décompresse son contenu dans le dossier du jeu où se trouve `KingdomTwoCrowns.exe`. Le [guide officiel d’installation IL2CPP de BepInEx](https://docs.bepinex.dev/master/articles/user_guide/installation/unity_il2cpp.html) décrit le premier lancement et la génération des fichiers. BepInEx est une dépendance externe et n’est pas inclus dans ce dépôt.
+
+## Installer le mod
+
+1. Décompresse BepInEx dans le dossier du jeu et lance le jeu une première fois pour générer les fichiers IL2CPP. Ferme le jeu quand le menu apparaît.
+2. Copie le dossier `BepInEx/plugins/ArchipelagoRandomizer` de ce dépôt dans le dossier `BepInEx/plugins` du jeu.
+3. Pour générer une partie Archipelago en local, installe `kingdomtwocrowns.apworld` dans l’Archipelago Launcher avec **Install APWorld**. Tu peux aussi double-cliquer sur le fichier `.apworld`. Consulte le [guide de configuration Archipelago](https://archipelago.gg/tutorial/Archipelago/setup_en#playing-with-custom-worlds). Le fichier `.apworld` sert au générateur ; les DLL du mod doivent être dans le jeu.
+4. Lance le jeu, connecte-toi au serveur Archipelago depuis le panneau de connexion du mod, puis charge la graine générée.
+
+BepInEx crée les fichiers d’interop IL2CPP du jeu lors du premier lancement. Ne copie pas les dossiers `interop`, les journaux, le cache ou les fichiers de configuration personnels d’une autre installation.
+
+## Compiler les sources
+
+Installe le SDK .NET 6 et BepInEx 6.0.0-be.753, puis lance le jeu une fois afin que BepInEx génère `BepInEx/interop`. Compile ensuite le projet :
+
+```powershell
+dotnet build src/Mod/APKingdom2Crown.csproj -c Release -p:GameDir="C:\Program Files (x86)\Steam\steamapps\common\Kingdom Two Crowns"
+```
+
+`GameDir` peut désigner un autre emplacement du jeu. Le projet utilise les assemblages interop générés et les fichiers core de BepInEx présents dans cette installation.
+
+## Journaux et dépannage
+
+Après le lancement, consulte `BepInEx/LogOutput.log`. Pour signaler un problème, joins ce journal et indique la version du jeu, de BepInEx et du serveur Archipelago. N’envoie pas de sauvegarde ni de mot de passe.
+
+## Composants tiers
+
+BepInEx est un projet séparé distribué sous licence LGPL-2.1. Son runtime n’est ni inclus ni modifié dans ce dépôt : télécharge-le depuis le service officiel de builds BepInEx. Les DLL de dépendances incluses conservent leurs licences respectives.

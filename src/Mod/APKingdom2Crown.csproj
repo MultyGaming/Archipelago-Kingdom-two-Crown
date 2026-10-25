@@ -1,0 +1,429 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <GameDir Condition="'$(GameDir)' == ''">C:\Program Files (x86)\Steam\steamapps\common\Kingdom Two Crowns</GameDir>
+    <BepInExPath Condition="'$(BepInExPath)' == ''">$(GameDir)\BepInEx</BepInExPath>
+    <AssemblyName>APKingdom2Crown</AssemblyName>
+    <Product>Archipelago Randomizer</Product>
+    <Version>0.3.2</Version>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>latest</LangVersion>
+    <RestoreAdditionalProjectSources>
+      https://api.nuget.org/v3/index.json;
+      https://nuget.bepinex.dev/v3/index.json;
+      https://nuget.samboy.dev/v3/index.json
+    </RestoreAdditionalProjectSources>
+    <RootNamespace>APKingdom2Crown</RootNamespace>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+  
+
+  <ItemGroup>
+
+    <Reference Include="Archipelago.MultiClient.Net">
+        <HintPath>Dll\Archipelago.MultiClient.Net.dll</HintPath>
+    </Reference>
+
+    <Reference Include="APNewtonsoft.Json">
+        <HintPath>Dll\APNewtonsoft.Json.dll</HintPath>
+    </Reference>
+
+<!--
+
+    <Reference Include="Newtonsoft.Json">
+        <HintPath>$(BepInExPath)\interop\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+
+-->
+
+  <!-- AUTO-GENERATED INTEROP REFERENCES START -->
+    <Reference Include="__Generated">
+        <HintPath>$(BepInExPath)\interop\__Generated.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp-firstpass">
+        <HintPath>$(BepInExPath)\interop\Assembly-CSharp-firstpass.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+        <HintPath>$(BepInExPath)\interop\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="com.rlabrecque.steamworks.net">
+        <HintPath>$(BepInExPath)\interop\com.rlabrecque.steamworks.net.dll</HintPath>
+    </Reference>
+    <Reference Include="DOTween43">
+        <HintPath>$(BepInExPath)\interop\DOTween43.dll</HintPath>
+    </Reference>
+    <Reference Include="DOTween46">
+        <HintPath>$(BepInExPath)\interop\DOTween46.dll</HintPath>
+    </Reference>
+    <Reference Include="DOTweenPro">
+        <HintPath>$(BepInExPath)\interop\DOTweenPro.dll</HintPath>
+    </Reference>
+    <Reference Include="DOTween">
+        <HintPath>$(BepInExPath)\interop\DOTween.dll</HintPath>
+    </Reference>
+    <Reference Include="GalaxyCSharp">
+        <HintPath>$(BepInExPath)\interop\GalaxyCSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="GDK-Tools">
+        <HintPath>$(BepInExPath)\interop\GDK-Tools.dll</HintPath>
+    </Reference>
+    <Reference Include="GdkUtilities">
+        <HintPath>$(BepInExPath)\interop\GdkUtilities.dll</HintPath>
+    </Reference>
+    <Reference Include="Haglet-Assembly-CSharp-02">
+        <HintPath>$(BepInExPath)\interop\Haglet-Assembly-CSharp-02.dll</HintPath>
+    </Reference>
+    <Reference Include="Il2CppMono.Security">
+        <HintPath>$(BepInExPath)\interop\Il2CppMono.Security.dll</HintPath>
+    </Reference>
+    <Reference Include="Il2Cppmscorlib">
+        <HintPath>$(BepInExPath)\interop\Il2Cppmscorlib.dll</HintPath>
+    </Reference>
+    <Reference Include="Il2CppSystem.Configuration">
+        <HintPath>$(BepInExPath)\interop\Il2CppSystem.Configuration.dll</HintPath>
+    </Reference>
+    <Reference Include="Il2CppSystem.Core">
+        <HintPath>$(BepInExPath)\interop\Il2CppSystem.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Il2CppSystem.Data">
+        <HintPath>$(BepInExPath)\interop\Il2CppSystem.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="Il2CppSystem.Drawing">
+        <HintPath>$(BepInExPath)\interop\Il2CppSystem.Drawing.dll</HintPath>
+    </Reference>
+    <Reference Include="Il2CppSystem.Numerics">
+        <HintPath>$(BepInExPath)\interop\Il2CppSystem.Numerics.dll</HintPath>
+    </Reference>
+    <Reference Include="Il2CppSystem.Runtime.Serialization">
+        <HintPath>$(BepInExPath)\interop\Il2CppSystem.Runtime.Serialization.dll</HintPath>
+    </Reference>
+    <Reference Include="Il2CppSystem.Xml.Linq">
+        <HintPath>$(BepInExPath)\interop\Il2CppSystem.Xml.Linq.dll</HintPath>
+    </Reference>
+    <Reference Include="Il2CppSystem.Xml">
+        <HintPath>$(BepInExPath)\interop\Il2CppSystem.Xml.dll</HintPath>
+    </Reference>
+    <Reference Include="Il2CppSystem">
+        <HintPath>$(BepInExPath)\interop\Il2CppSystem.dll</HintPath>
+    </Reference>
+    <Reference Include="Playfab.Party">
+        <HintPath>$(BepInExPath)\interop\Playfab.Party.dll</HintPath>
+    </Reference>
+    <Reference Include="PlayFab">
+        <HintPath>$(BepInExPath)\interop\PlayFab.dll</HintPath>
+    </Reference>
+    <Reference Include="Rewired_Core">
+        <HintPath>$(BepInExPath)\interop\Rewired_Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Rewired_Windows">
+        <HintPath>$(BepInExPath)\interop\Rewired_Windows.dll</HintPath>
+    </Reference>
+    <Reference Include="SonyPS4SavedGames">
+        <HintPath>$(BepInExPath)\interop\SonyPS4SavedGames.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.2D.Animation.Runtime">
+        <HintPath>$(BepInExPath)\interop\Unity.2D.Animation.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Burst.Unsafe">
+        <HintPath>$(BepInExPath)\interop\Unity.Burst.Unsafe.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Burst">
+        <HintPath>$(BepInExPath)\interop\Unity.Burst.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Collections.LowLevel.ILSupport">
+        <HintPath>$(BepInExPath)\interop\Unity.Collections.LowLevel.ILSupport.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Collections">
+        <HintPath>$(BepInExPath)\interop\Unity.Collections.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.InternalAPIEngineBridge.001">
+        <HintPath>$(BepInExPath)\interop\Unity.InternalAPIEngineBridge.001.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Mathematics">
+        <HintPath>$(BepInExPath)\interop\Unity.Mathematics.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Networking.Transport">
+        <HintPath>$(BepInExPath)\interop\Unity.Networking.Transport.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.RenderPipelines.Core.Runtime">
+        <HintPath>$(BepInExPath)\interop\Unity.RenderPipelines.Core.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Services.Analytics">
+        <HintPath>$(BepInExPath)\interop\Unity.Services.Analytics.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Services.Core.Configuration">
+        <HintPath>$(BepInExPath)\interop\Unity.Services.Core.Configuration.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Services.Core.Device">
+        <HintPath>$(BepInExPath)\interop\Unity.Services.Core.Device.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Services.Core.Environments.Internal">
+        <HintPath>$(BepInExPath)\interop\Unity.Services.Core.Environments.Internal.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Services.Core.Internal">
+        <HintPath>$(BepInExPath)\interop\Unity.Services.Core.Internal.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Services.Core.Registration">
+        <HintPath>$(BepInExPath)\interop\Unity.Services.Core.Registration.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Services.Core.Scheduler">
+        <HintPath>$(BepInExPath)\interop\Unity.Services.Core.Scheduler.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Services.Core.Telemetry">
+        <HintPath>$(BepInExPath)\interop\Unity.Services.Core.Telemetry.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Services.Core.Threading">
+        <HintPath>$(BepInExPath)\interop\Unity.Services.Core.Threading.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Services.Core">
+        <HintPath>$(BepInExPath)\interop\Unity.Services.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.TextMeshPro">
+        <HintPath>$(BepInExPath)\interop\Unity.TextMeshPro.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Timeline">
+        <HintPath>$(BepInExPath)\interop\Unity.Timeline.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.AccessibilityModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.AccessibilityModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.AIModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.AIModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.AndroidJNIModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.AndroidJNIModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.AnimationModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.AnimationModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.AssetBundleModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.AssetBundleModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.AudioModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.AudioModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.ClothModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.ClothModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.ClusterInputModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.ClusterInputModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.ClusterRendererModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.ClusterRendererModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.ContentLoadModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.ContentLoadModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CrashReportingModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.CrashReportingModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.DirectorModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.DirectorModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.DSPGraphModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.DSPGraphModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.GameCenterModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.GameCenterModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.GIModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.GIModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.GridModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.GridModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.HotReloadModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.HotReloadModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.ImageConversionModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.ImageConversionModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.IMGUIModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.InputLegacyModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.InputModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.InputModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.JSONSerializeModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.JSONSerializeModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.LocalizationModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.LocalizationModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.ParticleSystemModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.ParticleSystemModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.PerformanceReportingModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.PerformanceReportingModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.Physics2DModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.Physics2DModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.PhysicsModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.PhysicsModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.PropertiesModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.PropertiesModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.RuntimeInitializeOnLoadManagerInitializerModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.RuntimeInitializeOnLoadManagerInitializerModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.ScreenCaptureModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.ScreenCaptureModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.SharedInternalsModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.SharedInternalsModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.SpriteMaskModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.SpriteMaskModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.SpriteShapeModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.SpriteShapeModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.StreamingModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.StreamingModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.SubstanceModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.SubstanceModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.SubsystemsModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.SubsystemsModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.TerrainModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.TerrainModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.TerrainPhysicsModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.TerrainPhysicsModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.TextCoreFontEngineModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.TextCoreFontEngineModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.TextCoreTextEngineModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.TextCoreTextEngineModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.TextRenderingModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.TilemapModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.TilemapModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.TLSModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.TLSModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UIElementsModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.UIElementsModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UIModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.UIModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UmbraModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.UmbraModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityAnalyticsCommonModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.UnityAnalyticsCommonModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityAnalyticsModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.UnityAnalyticsModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityConnectModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.UnityConnectModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityCurlModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.UnityCurlModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityTestProtocolModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.UnityTestProtocolModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestAssetBundleModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.UnityWebRequestAssetBundleModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestAudioModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.UnityWebRequestAudioModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.UnityWebRequestModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestTextureModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.UnityWebRequestTextureModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestWWWModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.UnityWebRequestWWWModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.VehiclesModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.VehiclesModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.VFXModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.VFXModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.VideoModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.VideoModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.VirtualTexturingModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.VirtualTexturingModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.VRModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.VRModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.WindModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.WindModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.XRModule">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.XRModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
+        <HintPath>$(BepInExPath)\interop\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="XGamingRuntime">
+        <HintPath>$(BepInExPath)\interop\XGamingRuntime.dll</HintPath>
+    </Reference>
+  <!-- AUTO-GENERATED INTEROP REFERENCES END -->
+</ItemGroup>
+  <ItemGroup>
+    <Reference Include="0Harmony"><HintPath>$(BepInExPath)\core\0Harmony.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="AsmResolver"><HintPath>$(BepInExPath)\core\AsmResolver.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="AsmResolver.DotNet"><HintPath>$(BepInExPath)\core\AsmResolver.DotNet.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="AsmResolver.PE"><HintPath>$(BepInExPath)\core\AsmResolver.PE.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="AsmResolver.PE.File"><HintPath>$(BepInExPath)\core\AsmResolver.PE.File.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="AssetRipper.CIL"><HintPath>$(BepInExPath)\core\AssetRipper.CIL.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="AssetRipper.Primitives"><HintPath>$(BepInExPath)\core\AssetRipper.Primitives.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="BepInEx.Core"><HintPath>$(BepInExPath)\core\BepInEx.Core.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="BepInEx.Preloader.Core"><HintPath>$(BepInExPath)\core\BepInEx.Preloader.Core.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="BepInEx.Unity.Common"><HintPath>$(BepInExPath)\core\BepInEx.Unity.Common.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="BepInEx.Unity.IL2CPP"><HintPath>$(BepInExPath)\core\BepInEx.Unity.IL2CPP.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="Cpp2IL.Core"><HintPath>$(BepInExPath)\core\Cpp2IL.Core.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="Disarm"><HintPath>$(BepInExPath)\core\Disarm.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="Gee.External.Capstone"><HintPath>$(BepInExPath)\core\Gee.External.Capstone.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="Iced"><HintPath>$(BepInExPath)\core\Iced.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="Il2CppInterop.Common"><HintPath>$(BepInExPath)\core\Il2CppInterop.Common.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="Il2CppInterop.Generator"><HintPath>$(BepInExPath)\core\Il2CppInterop.Generator.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="Il2CppInterop.HarmonySupport"><HintPath>$(BepInExPath)\core\Il2CppInterop.HarmonySupport.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="Il2CppInterop.Runtime"><HintPath>$(BepInExPath)\core\Il2CppInterop.Runtime.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="LibCpp2IL"><HintPath>$(BepInExPath)\core\LibCpp2IL.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="Mono.Cecil"><HintPath>$(BepInExPath)\core\Mono.Cecil.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="Mono.Cecil.Mdb"><HintPath>$(BepInExPath)\core\Mono.Cecil.Mdb.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="Mono.Cecil.Pdb"><HintPath>$(BepInExPath)\core\Mono.Cecil.Pdb.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="Mono.Cecil.Rocks"><HintPath>$(BepInExPath)\core\Mono.Cecil.Rocks.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="MonoMod.Backports"><HintPath>$(BepInExPath)\core\MonoMod.Backports.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="MonoMod.ILHelpers"><HintPath>$(BepInExPath)\core\MonoMod.ILHelpers.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="MonoMod.RuntimeDetour"><HintPath>$(BepInExPath)\core\MonoMod.RuntimeDetour.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="MonoMod.Utils"><HintPath>$(BepInExPath)\core\MonoMod.Utils.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="SemanticVersioning"><HintPath>$(BepInExPath)\core\SemanticVersioning.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="StableNameDotNet"><HintPath>$(BepInExPath)\core\StableNameDotNet.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="WasmDisassembler"><HintPath>$(BepInExPath)\core\WasmDisassembler.dll</HintPath><Private>False</Private></Reference>
+  </ItemGroup>
+</Project>
+
+
+
+
+

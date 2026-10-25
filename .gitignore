@@ -1,0 +1,10 @@
+# Local build outputs
+**/bin/
+**/obj/
+
+# Generated BepInEx/game data
+BepInEx/config/
+BepInEx/cache/
+BepInEx/interop/
+BepInEx/LogOutput.log
+BepInEx/ErrorLog.log
