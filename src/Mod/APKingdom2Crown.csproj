@@ -6,7 +6,7 @@
     <BepInExPath Condition="'$(BepInExPath)' == ''">$(GameDir)\BepInEx</BepInExPath>
     <AssemblyName>APKingdom2Crown</AssemblyName>
     <Product>Archipelago Randomizer</Product>
-    <Version>0.3.4</Version>
+    <Version>0.3.5</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
     <RestoreAdditionalProjectSources>

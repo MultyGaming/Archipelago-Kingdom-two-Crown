@@ -8,15 +8,16 @@ Archipelago integration for **Kingdom Two Crowns**.
 
 - Kingdom Two Crowns **2.4.3**, Windows x64
 - Archipelago **0.6.8** (minimum version required by this APWorld)
-- Mod plugin **0.3.4**
+- Mod plugin **0.3.5**
 - APWorld **0.3.2**
 - BepInEx **6.0.0-be.753**, Unity IL2CPP, Windows x64
 
-The BepInEx version is pinned to the build tested with the game. Its IL2CPP loader, preloader and patching support come in the official BepInEx archive; no separate IL2CPP patcher is required. The optional BepInEx Configuration Manager patcher is not required by this mod.
+The tested base is BepInEx **6.0.0-be.753**. In our test installation, the game did not start with only the official files from that build. `PatchAK2C.zip` therefore provides the `core` and `patchers` folders from the working modpack setup; copying them over the corresponding game folders allows the game to start in that setup. This is not a standalone BepInEx installation: install the official `.753` archive first.
 
 ## Files in this repository
 
 - `BepInEx/plugins/ArchipelagoRandomizer/` — mod plugin and its required DLL dependencies.
+- `PatchAK2C.zip` — `core` and `patchers` files to copy into the game's `BepInEx` folder, replacing existing files.
 - `kingdomtwocrowns.apworld` — packaged Archipelago world for local generation.
 - `worlds/kingdomtwocrowns/` — APWorld source.
 - `src/Mod/` — BepInEx plugin source.
@@ -27,14 +28,15 @@ Download the exact **Unity IL2CPP, Windows x64, build 753** archive:
 
 [`BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.753+0d275a4.zip`](https://builds.bepinex.dev/projects/bepinex_be/753/BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.753%2B0d275a4.zip)
 
-Extract its contents into the game folder containing `KingdomTwoCrowns.exe`. The official [BepInEx IL2CPP installation guide](https://docs.bepinex.dev/master/articles/user_guide/installation/unity_il2cpp.html) explains the first launch and generated files. The BepInEx build is an external dependency and is not bundled here.
+Extract its contents into the game folder containing `KingdomTwoCrowns.exe`. The official [BepInEx IL2CPP installation guide](https://docs.bepinex.dev/master/articles/user_guide/installation/unity_il2cpp.html) explains the base installation. The official archive provides the BepInEx base; `PatchAK2C.zip` in this repository supplies the `core` and `patchers` folders used by the tested setup.
 
 ## Install the mod
 
-1. Extract BepInEx into the game folder and launch the game once so it can generate its IL2CPP files. Close the game when it reaches the menu.
-2. Copy this repository's `BepInEx/plugins/ArchipelagoRandomizer` folder into the game's `BepInEx/plugins` folder.
-3. To generate a local Archipelago game, install `kingdomtwocrowns.apworld` in the Archipelago Launcher with **Install APWorld**. You can also double-click the `.apworld` file. See the [Archipelago setup guide](https://archipelago.gg/tutorial/Archipelago/setup_en#playing-with-custom-worlds). The `.apworld` is needed by the generator; the mod DLLs are needed in the game.
-4. Launch the game, enter the server address and port, slot name, and optional password in the in-game connection panel, then load the generated seed. The DeathLink mode is selected in the generated YAML.
+1. Extract BepInEx `.753` into the game folder containing `KingdomTwoCrowns.exe`.
+2. Close the game if it is running. Extract `PatchAK2C.zip` to a temporary folder, then copy its `core` and `patchers` folders into the game's `BepInEx` folder. Allow existing files to be replaced. The destinations are `BepInEx/core` and `BepInEx/patchers`; the zip does not contain the parent `BepInEx` folder.
+3. Copy this repository's `BepInEx/plugins/ArchipelagoRandomizer` folder into the game's `BepInEx/plugins` folder.
+4. To generate a local Archipelago game, install `kingdomtwocrowns.apworld` in the Archipelago Launcher with **Install APWorld**. You can also double-click the `.apworld` file. See the [Archipelago setup guide](https://archipelago.gg/tutorial/Archipelago/setup_en#playing-with-custom-worlds). The `.apworld` is needed by the generator; the mod DLLs are needed in the game.
+5. Launch the game, enter the server address and port, slot name, and optional password in the in-game connection panel, then load the generated seed. The DeathLink mode is selected in the generated YAML.
 
 ## DeathLink
 
@@ -58,4 +60,4 @@ After launching, check `BepInEx/LogOutput.log`. When reporting a problem, includ
 
 ## Third-party components
 
-BepInEx is a separate project distributed under LGPL-2.1. This repository does not bundle or modify its runtime; download it from the official BepInEx build service. The included mod dependency DLLs retain their respective upstream terms.
+BepInEx is a separate project distributed under LGPL-2.1. `PatchAK2C.zip` redistributes BepInEx `core` files and a configuration-manager patcher from the tested modpack setup; install the official `.753` base first. Included dependency DLLs retain their respective upstream terms; see [THIRD_PARTY.md](THIRD_PARTY.md).
