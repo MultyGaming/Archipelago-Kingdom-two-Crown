@@ -4,12 +4,12 @@ This project continues the [original Archipelago mod by Catalyss](https://github
 
 Archipelago integration for **Kingdom Two Crowns**.
 
-## Tested setup
+## Compatibility target
 
 - Kingdom Two Crowns **2.4.3**, Windows x64
 - Archipelago **0.6.8** (minimum version required by this APWorld)
-- Mod plugin **0.3.2**
-- APWorld **0.3.1**
+- Mod plugin **0.3.4**
+- APWorld **0.3.2**
 - BepInEx **6.0.0-be.753**, Unity IL2CPP, Windows x64
 
 The BepInEx version is pinned to the build tested with the game. Its IL2CPP loader, preloader and patching support come in the official BepInEx archive; no separate IL2CPP patcher is required. The optional BepInEx Configuration Manager patcher is not required by this mod.
@@ -34,7 +34,11 @@ Extract its contents into the game folder containing `KingdomTwoCrowns.exe`. The
 1. Extract BepInEx into the game folder and launch the game once so it can generate its IL2CPP files. Close the game when it reaches the menu.
 2. Copy this repository's `BepInEx/plugins/ArchipelagoRandomizer` folder into the game's `BepInEx/plugins` folder.
 3. To generate a local Archipelago game, install `kingdomtwocrowns.apworld` in the Archipelago Launcher with **Install APWorld**. You can also double-click the `.apworld` file. See the [Archipelago setup guide](https://archipelago.gg/tutorial/Archipelago/setup_en#playing-with-custom-worlds). The `.apworld` is needed by the generator; the mod DLLs are needed in the game.
-4. Launch the game, connect to the Archipelago server from the mod's in-game connection panel, and load the generated seed.
+4. Launch the game, enter the server address and port, slot name, and optional password in the in-game connection panel, then load the generated seed. The DeathLink mode is selected in the generated YAML.
+
+## DeathLink
+
+Choose one mode in the YAML: **Disabled**, **DeathLink** (drop all carried coins when a linked player dies), **DeathLink Hard** (lose the crown), or **DeathLink Extreme** (take fatal damage). When DeathLink is enabled, an actual local monarch death is also sent to Archipelago. The connection panel does not override the YAML selection.
 
 BepInEx generates the game's IL2CPP interop files on first launch. Do not copy `interop`, logs, cache, or personal config files from another installation.
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Archipelago.MultiClient.Net;
+using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
 using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Helpers;
 using BepInEx;
@@ -43,7 +44,9 @@ public class Plugin : BasePlugin
     public static ConfigEntry<string> ConfigHost;
     public static ConfigEntry<string> ConfigSlot;
     public static ConfigEntry<string> ConfigPassword;
-    public static ConfigEntry<int> ConfigDeathLinkMode;
+    internal static int DeathLinkMode;
+    internal static bool ApplyingIncomingDeathLink;
+    private static bool LocalDeathReported;
 
     internal static readonly string[] MilestoneFamilies =
     {
@@ -84,9 +87,6 @@ public class Plugin : BasePlugin
 
         ConfigPassword = Config.Bind("Archipelago", "Password", "",
             "Your Archipelago game password.");
-
-        ConfigDeathLinkMode = Config.Bind("Archipelago", "DeathLinkMode", 0,
-            "Death Link Mode: 0=None, 1=Easy, 2=Hard");
 
         TouchTypes();
 
@@ -132,6 +132,7 @@ public class Plugin : BasePlugin
         GoalIslandCount = ReadSlotInt(slotData, "goal_island_count", 5);
         GoalPortalCount = ReadSlotInt(slotData, "goal_portal_count", 23);
         LighthouseChecksEnabled = ReadSlotInt(slotData, "lighthouse_checks", 1) != 0;
+        DeathLinkMode = ReadSlotInt(slotData, "deathlink_mode", 0);
         APCheckTracker.LoadProgress();
         APGoalTracker.Reset();
     }
@@ -148,6 +149,71 @@ public class Plugin : BasePlugin
             return fallback;
         }
     }
+
+    internal static void ApplyIncomingDeathLink(DeathLink deathLink)
+    {
+        if (DeathLinkMode <= 0) return;
+
+        try
+        {
+            var playerType = Il2CppSystem.Type.GetType("Player, Assembly-CSharp");
+            if (playerType == null)
+            {
+                Log.LogWarning("[AP] Received DeathLink, but the game Player type is unavailable.");
+                return;
+            }
+
+            var players = UnityEngine.Object.FindObjectsOfType(playerType, true);
+            if (players == null || players.Length == 0)
+            {
+                Log.LogWarning("[AP] Received DeathLink, but no player is currently active.");
+                return;
+            }
+
+            ApplyingIncomingDeathLink = true;
+            foreach (var obj in players)
+            {
+                var player = Il2CppObjectPool.Get<Player>(obj.Pointer);
+                switch (DeathLinkMode)
+                {
+                    case 1: // Standard: drop the coin purse.
+                        if (player.wallet != null)
+                        {
+                            int coinsToDrop = player.wallet.Coins;
+                            for (int i = 0; i < coinsToDrop && player.wallet.Coins > 0; i++)
+                                player.TryDropCurrency(CurrencyType.Coins);
+                        }
+                        break;
+                    case 2: // Hard: lose the crown.
+                        player.LoseCrownDebug();
+                        break;
+                    case 3: // Extreme: apply fatal game damage.
+                        if (player.damageable != null)
+                            player.damageable.ReceiveFatalDamage(player.gameObject, DamageSource.Fire);
+                        break;
+                }
+            }
+
+            Log.LogInfo($"[AP] DeathLink received from {deathLink?.Source ?? "another player"}; mode {DeathLinkMode} applied.");
+        }
+        catch (Exception ex)
+        {
+            Log.LogError($"[AP] Failed to apply incoming DeathLink: {ex}");
+        }
+        finally
+        {
+            ApplyingIncomingDeathLink = false;
+        }
+    }
+
+    internal static void ReportLocalDeath()
+    {
+        if (!APconnected || DeathLinkMode <= 0 || ApplyingIncomingDeathLink || LocalDeathReported) return;
+        LocalDeathReported = true;
+        AP?.SendDeathLink("Kingdom Two Crowns: the monarch has died.");
+    }
+
+    internal static void ResetLocalDeathTracking() => LocalDeathReported = false;
 
     internal static bool ApplyReceivedItem(long itemId)
     {
@@ -731,15 +797,14 @@ public class DogSpawnFreeDogPatch
     }
 }
 
-[HarmonyPatch(typeof(Player), "LoseCrown")]
-public class PlayerLoseCrownPatch
+[HarmonyPatch(typeof(Damageable), "set_isDead")]
+public static class PlayerDeathPatch
 {
-    static void Postfix(Player __instance)
+    static void Postfix(Damageable __instance, bool value)
     {
-        if (!Plugin.APconnected) return;
-        //TODO Death Link Packet
-        Plugin.AP?.Session.Socket.SendPacket(null);
-        Plugin.Log.LogInfo($"[AP] Dog acquired  → Island 2 Dog");
+        if (__instance.GetComponent<Player>() == null) return;
+        if (value) Plugin.ReportLocalDeath();
+        else Plugin.ResetLocalDeathTracking();
     }
 }
 
@@ -1240,75 +1305,242 @@ public class ArchipelagoPauseUI : MonoBehaviour
     private string host = "archipelago.gg:38281";
     private string slot = "Monarch";
     private string password = "";
-    private int deathLinkMode = 0;
-    private readonly string[] deathLinkOptions = new string[] { "None", "Easy", "Hard" };
+    private TMP_InputField hostInput;
+    private TMP_InputField slotInput;
+    private TMP_InputField passwordInput;
+    private TMP_Text statusText;
+    private Button connectButton;
+    private Button disconnectButton;
+    private GameObject connectionCanvasObject;
+    private bool connecting;
+
     private void Awake()
     {
-        // Load from your plugin config
         host = Plugin.ConfigHost.Value;
         slot = Plugin.ConfigSlot.Value;
         password = Plugin.ConfigPassword.Value;
-        deathLinkMode = Plugin.ConfigDeathLinkMode.Value;
+        CreateConnectionPanel();
     }
-    private void OnGUI()
+
+    private void CreateConnectionPanel()
     {
-        if (!gameObject.activeSelf) return;
+        EnsureEventSystem();
 
-        // Simple static layout using GUI buttons (no TextField)
-        float y = 100;
-        float x = 100;
+        var canvasObject = new GameObject("ArchipelagoConnectionCanvas");
+        canvasObject.transform.SetParent(null, false);
+        UnityEngine.Object.DontDestroyOnLoad(canvasObject);
+        connectionCanvasObject = canvasObject;
+        var canvas = canvasObject.AddComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = 1000;
 
-        if (!Plugin.APconnected)
+        var scaler = canvasObject.AddComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1920f, 1080f);
+        scaler.matchWidthOrHeight = 0.5f;
+
+        canvasObject.AddComponent<GraphicRaycaster>();
+        var panel = CreateRect(canvasObject.transform, "ArchipelagoConnectionPanel", 28f, 28f, 560f, 350f);
+        var panelImage = panel.gameObject.AddComponent<Image>();
+        panelImage.color = new Color(0.035f, 0.025f, 0.025f, 0.96f);
+        panelImage.raycastTarget = false;
+
+        CreateLabel(panel, "Title", "Archipelago Connect", 20f, 14f, 520f, 38f, 25f, TextAlignmentOptions.Center);
+
+        CreateLabel(panel, "ServerLabel", "Server address:port", 20f, 64f, 170f, 38f, 18f, TextAlignmentOptions.Left);
+        hostInput = CreateInput(panel, "ServerInput", 195f, 65f, 340f, 38f, host, false);
+
+        CreateLabel(panel, "SlotLabel", "Slot name", 20f, 112f, 170f, 38f, 18f, TextAlignmentOptions.Left);
+        slotInput = CreateInput(panel, "SlotInput", 195f, 113f, 340f, 38f, slot, false);
+
+        CreateLabel(panel, "PasswordLabel", "Password (optional)", 20f, 160f, 170f, 38f, 18f, TextAlignmentOptions.Left);
+        passwordInput = CreateInput(panel, "PasswordInput", 195f, 161f, 340f, 38f, password, true);
+
+        CreateLabel(panel, "DeathLinkInfo", "DeathLink mode is selected in the generated YAML.", 20f, 210f, 520f, 30f, 16f, TextAlignmentOptions.Left);
+        statusText = CreateLabel(panel, "ConnectionStatus", "Not connected", 20f, 244f, 520f, 28f, 16f, TextAlignmentOptions.Left);
+
+        connectButton = CreateButton(panel, "ConnectButton", "Connect", 20f, 290f, 520f, 42f, Connect);
+        disconnectButton = CreateButton(panel, "DisconnectButton", "Disconnect", 20f, 290f, 520f, 42f, Disconnect);
+        disconnectButton.gameObject.SetActive(false);
+        canvasObject.SetActive(gameObject.activeInHierarchy);
+    }
+
+    private void OnEnable()
+    {
+        if (connectionCanvasObject != null)
+            connectionCanvasObject.SetActive(true);
+    }
+
+    private void OnDisable()
+    {
+        if (connectionCanvasObject != null)
+            connectionCanvasObject.SetActive(false);
+    }
+
+    private void OnDestroy()
+    {
+        if (connectionCanvasObject != null)
+            UnityEngine.Object.Destroy(connectionCanvasObject);
+    }
+
+    private void EnsureEventSystem()
+    {
+        EventSystem eventSystem = EventSystem.current;
+        if (eventSystem == null)
         {
-            GUI.Box(new Rect(x, y, 300, 210), "Archipelago Connect");
-            y += 20;
-
-            GUI.Label(new Rect(x + 10, y, 280, 25), $"Host: {host}");
-            y += 20;
-
-            GUI.Label(new Rect(x + 10, y, 280, 25), $"Slot: {slot}");
-            y += 20;
-
-            GUI.Label(new Rect(x + 10, y, 280, 25), "Death Link Mode:");
-            y += 25;
-            if (GUI.Button(new Rect(x + 10, y, 280, 25), deathLinkOptions[deathLinkMode]))
-            {
-                deathLinkMode = (deathLinkMode + 1) % deathLinkOptions.Length;
-            }
-            y += 30;
-            if (GUI.Button(new Rect(x + 10, y, 280, 25), "Reload Config"))
-            {
-                Plugin.ReloadConfig();
-                host = Plugin.ConfigHost.Value;
-                slot = Plugin.ConfigSlot.Value;
-                password = Plugin.ConfigPassword.Value;
-            }
-            y += 25;
-            if (GUI.Button(new Rect(x + 10, y, 280, 25), "Open Config"))
-                Plugin.OpenConfig();
-            y += 30;
-
-            if (GUI.Button(new Rect(x + 10, y, 280, 30), "Connect")) Connect();
+            var eventObject = new GameObject("ArchipelagoConnectionEventSystem");
+            eventSystem = eventObject.AddComponent<EventSystem>();
+            eventObject.AddComponent<StandaloneInputModule>();
+            eventObject.transform.SetParent(transform, false);
         }
-        else
+        else if (eventSystem.GetComponent<BaseInputModule>() == null)
         {
-            GUI.Box(new Rect(x, y, 300, 120), $"Connected to {host} as {slot}");
-            if (GUI.Button(new Rect(x + 10, y + 50, 280, 30), "Disconnect")) Disconnect();
+            eventSystem.gameObject.AddComponent<StandaloneInputModule>();
         }
     }
+
+    private RectTransform CreateRect(Transform parent, string name, float x, float y, float width, float height)
+    {
+        var child = new GameObject(name, Il2CppType.Of<RectTransform>());
+        child.transform.SetParent(parent, false);
+        var rect = child.GetComponent<RectTransform>();
+        rect.anchorMin = new Vector2(0f, 1f);
+        rect.anchorMax = new Vector2(0f, 1f);
+        rect.pivot = new Vector2(0f, 1f);
+        rect.anchoredPosition = new Vector2(x, -y);
+        rect.sizeDelta = new Vector2(width, height);
+        return rect;
+    }
+
+    private TMP_Text CreateLabel(Transform parent, string name, string value, float x, float y, float width, float height,
+        float fontSize, TextAlignmentOptions alignment)
+    {
+        var rect = CreateRect(parent, name, x, y, width, height);
+        var text = rect.gameObject.AddComponent<TextMeshProUGUI>();
+        if (PluginUI.KingdomTMPFont != null) text.font = PluginUI.KingdomTMPFont;
+        text.text = value;
+        text.fontSize = fontSize;
+        text.color = Color.white;
+        text.alignment = alignment;
+        text.raycastTarget = false;
+        return text;
+    }
+
+    private TMP_InputField CreateInput(Transform parent, string name, float x, float y, float width, float height,
+        string initialValue, bool isPassword)
+    {
+        var rect = CreateRect(parent, name, x, y, width, height);
+        rect.gameObject.SetActive(false);
+        var background = rect.gameObject.AddComponent<Image>();
+        background.color = new Color(0.22f, 0.22f, 0.22f, 1f);
+
+        var input = rect.gameObject.AddComponent<TMP_InputField>();
+        input.targetGraphic = background;
+        input.lineType = TMP_InputField.LineType.SingleLine;
+        input.contentType = isPassword ? TMP_InputField.ContentType.Password : TMP_InputField.ContentType.Standard;
+        input.characterLimit = 256;
+
+        var textRect = CreateRect(rect, name + "Text", 8f, 3f, width - 16f, height - 6f);
+        var text = textRect.gameObject.AddComponent<TextMeshProUGUI>();
+        if (PluginUI.KingdomTMPFont != null) text.font = PluginUI.KingdomTMPFont;
+        text.fontSize = 17f;
+        text.color = Color.white;
+        text.alignment = TextAlignmentOptions.MidlineLeft;
+        text.raycastTarget = false;
+
+        var placeholderRect = CreateRect(rect, name + "Placeholder", 8f, 3f, width - 16f, height - 6f);
+        var placeholder = placeholderRect.gameObject.AddComponent<TextMeshProUGUI>();
+        if (PluginUI.KingdomTMPFont != null) placeholder.font = PluginUI.KingdomTMPFont;
+        placeholder.text = isPassword ? "Optional" : (name == "ServerInput" ? "archipelago.gg:38281" : "Enter slot name");
+        placeholder.fontSize = 17f;
+        placeholder.color = new Color(0.7f, 0.7f, 0.7f, 1f);
+        placeholder.alignment = TextAlignmentOptions.MidlineLeft;
+        placeholder.fontStyle = FontStyles.Italic;
+        placeholder.raycastTarget = false;
+
+        input.textComponent = text;
+        input.placeholder = placeholder;
+        input.text = initialValue ?? string.Empty;
+        input.enabled = true;
+        rect.gameObject.SetActive(true);
+        return input;
+    }
+
+    private Button CreateButton(Transform parent, string name, string caption, float x, float y, float width, float height,
+        Action action)
+    {
+        var rect = CreateRect(parent, name, x, y, width, height);
+        var image = rect.gameObject.AddComponent<Image>();
+        image.color = new Color(0.42f, 0.29f, 0.2f, 1f);
+        var button = rect.gameObject.AddComponent<Button>();
+        button.targetGraphic = image;
+        button.onClick.AddListener(DelegateSupport.ConvertDelegate<UnityEngine.Events.UnityAction>(action));
+
+        var text = CreateLabel(rect, name + "Text", caption, 0f, 0f, width, height, 20f, TextAlignmentOptions.Center);
+        text.raycastTarget = false;
+        return button;
+    }
+
+    private void Update()
+    {
+        if (statusText == null) return;
+        bool connected = Plugin.APconnected;
+        if (hostInput != null) host = hostInput.text;
+        if (slotInput != null) slot = slotInput.text;
+        if (passwordInput != null) password = passwordInput.text;
+        connectButton.gameObject.SetActive(!connected);
+        disconnectButton.gameObject.SetActive(connected);
+        hostInput.interactable = !connected;
+        slotInput.interactable = !connected;
+        passwordInput.interactable = !connected;
+        if (connected)
+            statusText.text = $"Connected to {host} as {slot}";
+        else if (!connecting && statusText.text.StartsWith("Connected to", StringComparison.Ordinal))
+            statusText.text = "Not connected";
+    }
+
     private async void Connect()
     {
-        Plugin.Log.LogInfo($"[AP] Connecting to {host} as {slot} with DeathLink {deathLinkOptions[deathLinkMode]}");
-        Plugin.ConfigDeathLinkMode.Value = deathLinkMode;
-        Plugin.APconnected = await Plugin.AP.Connect(host, slot, password);
-
+        host = (host ?? string.Empty).Trim();
+        slot = (slot ?? string.Empty).Trim();
+        password ??= string.Empty;
+        if (string.IsNullOrWhiteSpace(host) || string.IsNullOrWhiteSpace(slot))
+        {
+            statusText.text = "Enter a server address and slot name.";
+            return;
+        }
+        Plugin.ConfigHost.Value = host;
+        Plugin.ConfigSlot.Value = slot;
+        Plugin.ConfigPassword.Value = password;
+        Plugin.Instance.Config.Save();
+        connecting = true;
+        statusText.text = "Connecting...";
+        connectButton.interactable = false;
+        Plugin.Log.LogInfo($"[AP] Connecting to {host} as {slot}; DeathLink mode comes from the generated YAML.");
+        try
+        {
+            Plugin.APconnected = await Plugin.AP.Connect(host, slot, password);
+            if (!Plugin.APconnected) statusText.text = "Connection failed. Check the details and log.";
+        }
+        finally
+        {
+            connecting = false;
+            if (connectButton != null) connectButton.interactable = true;
+        }
     }
 
     private async void Disconnect()
     {
         Plugin.Log.LogInfo("[AP] Disconnecting from Archipelago");
-        await Plugin.AP.Session.Socket.DisconnectAsync();
-        Plugin.APconnected = false;
+        try
+        {
+            await Plugin.AP.Session.Socket.DisconnectAsync();
+        }
+        finally
+        {
+            Plugin.APconnected = false;
+            statusText.text = "Not connected";
+        }
     }
 }
 public class InGameLogger : MonoBehaviour
@@ -1412,6 +1644,7 @@ public class KeyHandler : MonoBehaviour
     private void Update()
     {
         Archipelago.APConnection.ProcessPendingItems();
+        Archipelago.APConnection.ProcessPendingDeathLinks();
 
         if (_managers == null)
         {

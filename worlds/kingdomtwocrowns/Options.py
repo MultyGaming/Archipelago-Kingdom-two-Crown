@@ -76,6 +76,15 @@ class GoalPortalCount(Range):
     range_end = 23
     default = 23
 
+class DeathLinkMode(Choice):
+    """Choose what happens when another DeathLink player dies. Local deaths always send a DeathLink when enabled."""
+    display_name = "DeathLink Mode"
+    option_disabled = 0
+    option_deathlink = 1
+    option_deathlink_hard = 2
+    option_deathlink_extreme = 3
+    default = 0
+
 class GoldPouchCount(Range):
     """Number of random 5-10 coin rewards in the item pool."""
     display_name = "Gold Pouches in Item Pool"
@@ -105,5 +114,6 @@ class KingdomTwoCrownsOptions(PerGameCommonOptions):
     goal: Goal
     goal_island_count: GoalIslandCount
     goal_portal_count: GoalPortalCount
+    deathlink_mode: DeathLinkMode
     gold_pouch_count: GoldPouchCount
     gem_pack_count: GemPackCount

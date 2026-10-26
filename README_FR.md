@@ -4,12 +4,12 @@ Ce projet poursuit le [mod Archipelago original de Catalyss](https://github.com/
 
 Intégration Archipelago pour **Kingdom Two Crowns**.
 
-## Configuration vérifiée
+## Compatibilité visée
 
 - Kingdom Two Crowns **2.4.3**, Windows x64
 - Archipelago **0.6.8** (version minimale requise par cet APWorld)
-- Plugin du mod **0.3.2**
-- APWorld **0.3.1**
+- Plugin du mod **0.3.4**
+- APWorld **0.3.2**
 - BepInEx **6.0.0-be.753**, Unity IL2CPP, Windows x64
 
 Cette version de BepInEx est celle testée avec le jeu. Son chargeur IL2CPP, son préchargeur et les outils de patch sont compris dans l’archive officielle : aucun patcher IL2CPP séparé n’est requis. Le patcher optionnel BepInEx Configuration Manager n’est pas nécessaire au mod.
@@ -34,7 +34,11 @@ Décompresse son contenu dans le dossier du jeu où se trouve `KingdomTwoCrowns.
 1. Décompresse BepInEx dans le dossier du jeu et lance le jeu une première fois pour générer les fichiers IL2CPP. Ferme le jeu quand le menu apparaît.
 2. Copie le dossier `BepInEx/plugins/ArchipelagoRandomizer` de ce dépôt dans le dossier `BepInEx/plugins` du jeu.
 3. Pour générer une partie Archipelago en local, installe `kingdomtwocrowns.apworld` dans l’Archipelago Launcher avec **Install APWorld**. Tu peux aussi double-cliquer sur le fichier `.apworld`. Consulte le [guide de configuration Archipelago](https://archipelago.gg/tutorial/Archipelago/setup_en#playing-with-custom-worlds). Le fichier `.apworld` sert au générateur ; les DLL du mod doivent être dans le jeu.
-4. Lance le jeu, connecte-toi au serveur Archipelago depuis le panneau de connexion du mod, puis charge la graine générée.
+4. Lance le jeu, saisis l’adresse et le port du serveur, le nom du slot et le mot de passe éventuel dans le panneau de connexion, puis charge la graine générée. Le mode DeathLink se choisit dans le YAML généré.
+
+## DeathLink
+
+Choisis un mode dans le YAML : **Désactivé**, **DeathLink** (perdre toutes les pièces transportées quand un joueur lié meurt), **DeathLink Hard** (perdre la couronne) ou **DeathLink Extreme** (subir des dégâts mortels). Si DeathLink est activé, la mort réelle du monarque local est également signalée à Archipelago. Le panneau de connexion ne remplace pas le choix du YAML.
 
 BepInEx crée les fichiers d’interop IL2CPP du jeu lors du premier lancement. Ne copie pas les dossiers `interop`, les journaux, le cache ou les fichiers de configuration personnels d’une autre installation.
 

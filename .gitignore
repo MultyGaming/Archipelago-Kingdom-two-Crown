@@ -8,3 +8,4 @@ BepInEx/cache/
 BepInEx/interop/
 BepInEx/LogOutput.log
 BepInEx/ErrorLog.log
+RELEASE_NOTES.md

@@ -130,6 +130,7 @@ class KingdomTwoCrownsWorld(World):
             "goal": self.options.goal.value,
             "goal_island_count": self.options.goal_island_count.value,
             "goal_portal_count": self.options.goal_portal_count.value,
+            "deathlink_mode": self.options.deathlink_mode.value,
             "lighthouse_checks": self.options.lighthouse_checks.value,
             "gold_pouch_count": self.options.gold_pouch_count.value,
             "gem_pack_count": self.options.gem_pack_count.value,

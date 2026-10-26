@@ -1,4 +1,5 @@
 using Archipelago.MultiClient.Net;
+using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
 using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Helpers;
 using System;
@@ -11,8 +12,10 @@ namespace APKingdom2Crown.Archipelago
     public class APConnection
     {
         private static readonly ConcurrentQueue<long> PendingItems = new();
+        private static readonly ConcurrentQueue<DeathLink> PendingDeathLinks = new();
 
         public ArchipelagoSession Session { get; private set; }
+        private DeathLinkService DeathLinkService { get; set; }
         public bool Connected => Session?.Socket?.Connected ?? false;
 
         public async Task<bool> Connect(string address, string slotName, string password = "")
@@ -21,7 +24,7 @@ namespace APKingdom2Crown.Archipelago
             {
                 if (!Connected)
                 {
-                    Plugin.Log.LogInfo($"{address} , {slotName} , {password}");
+                    Plugin.Log.LogInfo($"[AP] Opening a session for {slotName} at {address}.");
 
                     Session = ArchipelagoSessionFactory.CreateSession($"{address}");
                     Session.Socket.SocketClosed += SocketClosed;
@@ -37,7 +40,7 @@ namespace APKingdom2Crown.Archipelago
                     slotName,
                     ItemsHandlingFlags.AllItems,
                     new Version("0.6.8"),
-                    new string[] { "DeathLink", "NoText" },
+                    new string[] { "NoText" },
                     null,
                     password,
                     true
@@ -46,6 +49,7 @@ namespace APKingdom2Crown.Archipelago
                 if (result is LoginSuccessful success)
                 {
                     Plugin.ApplySlotData(success.SlotData);
+                    ConfigureDeathLink(Plugin.DeathLinkMode);
                     Plugin.Log.LogInfo($"[AP] Connected as {success.Slot} in team {success.Team}");
                     return true;
                 }
@@ -61,6 +65,45 @@ namespace APKingdom2Crown.Archipelago
             {
                 Plugin.Log.LogError($"[AP] Connection failed: {ex}");
                 return false;
+            }
+        }
+
+        private void ConfigureDeathLink(int mode)
+        {
+            if (Session == null) return;
+            try
+            {
+                DeathLinkService = Session.CreateDeathLinkService();
+                DeathLinkService.OnDeathLinkReceived += deathLink => PendingDeathLinks.Enqueue(deathLink);
+                if (mode > 0)
+                {
+                    DeathLinkService.EnableDeathLink();
+                    Plugin.Log.LogInfo($"[AP] DeathLink enabled from YAML (mode {mode}).");
+                }
+                else
+                {
+                    DeathLinkService.DisableDeathLink();
+                    Plugin.Log.LogInfo("[AP] DeathLink is disabled by the generated YAML.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Plugin.Log.LogError($"[AP] Could not configure DeathLink: {ex}");
+            }
+        }
+
+        public void SendDeathLink(string cause)
+        {
+            if (DeathLinkService == null || !Connected || Plugin.DeathLinkMode <= 0) return;
+            try
+            {
+                string source = Plugin.ConfigSlot?.Value ?? "Kingdom Two Crowns";
+                DeathLinkService.SendDeathLink(new DeathLink(source, cause));
+                Plugin.Log.LogInfo("[AP] Sent DeathLink after the monarch died.");
+            }
+            catch (Exception ex)
+            {
+                Plugin.Log.LogError($"[AP] Could not send DeathLink: {ex.Message}");
             }
         }
 
@@ -104,6 +147,13 @@ namespace APKingdom2Crown.Archipelago
 
                 PendingItems.TryDequeue(out _);
             }
+        }
+
+        public static void ProcessPendingDeathLinks()
+        {
+            if (PendingDeathLinks.IsEmpty || Plugin.AP?.Connected != true) return;
+            while (PendingDeathLinks.TryDequeue(out var deathLink))
+                Plugin.ApplyIncomingDeathLink(deathLink);
         }
 
         public void CompleteLocation(long locationId)
