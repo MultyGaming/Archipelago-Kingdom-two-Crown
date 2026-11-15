@@ -159,9 +159,23 @@ namespace APKingdom2Crown.Archipelago
         public void CompleteLocation(long locationId)
         {
             if (!Connected) return;
+            if (!APCheckTracker.TryBeginLocationCheck(locationId))
+            {
+                Plugin.Log.LogInfo($"[AP] Skipped duplicate location check {locationId}; it is already saved locally or checked on the server.");
+                return;
+            }
 
-            Plugin.Log.LogInfo($"[AP] Completed location {locationId}");
-            Session.Locations.CompleteLocationChecks(locationId);
+            try
+            {
+                Session.Locations.CompleteLocationChecks(locationId);
+                APCheckTracker.ConfirmLocationCheckSent(locationId);
+                Plugin.Log.LogInfo($"[AP] Completed location {locationId} and saved it locally.");
+            }
+            catch (Exception ex)
+            {
+                APCheckTracker.CancelLocationCheckSend(locationId);
+                Plugin.Log.LogError($"[AP] Could not complete location {locationId}: {ex.Message}");
+            }
         }
     }
 }

@@ -8,7 +8,7 @@ Archipelago integration for **Kingdom Two Crowns**.
 
 - Kingdom Two Crowns **2.4.3**, Windows x64
 - Archipelago **0.6.8** (minimum version required by this APWorld)
-- Mod plugin **0.3.5**
+- Mod plugin **0.3.6**
 - APWorld **0.3.2**
 - BepInEx **6.0.0-be.753**, Unity IL2CPP, Windows x64
 
@@ -17,6 +17,7 @@ The tested base is BepInEx **6.0.0-be.753**. In our test installation, the game 
 ## Files in this repository
 
 - `BepInEx/plugins/ArchipelagoRandomizer/` — mod plugin and its required DLL dependencies.
+- `K2CArchipelagoRandomizer.zip` — the mod plugin DLL and its runtime dependencies.
 - `PatchAK2C.zip` — `core` and `patchers` files to copy into the game's `BepInEx` folder, replacing existing files.
 - `kingdomtwocrowns.apworld` — packaged Archipelago world for local generation.
 - `worlds/kingdomtwocrowns/` — APWorld source.

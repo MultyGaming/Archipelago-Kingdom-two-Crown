@@ -342,8 +342,7 @@ public class PortalOnDestroyPatch
         if (!Plugin.APconnected) return;
         if (__instance.type == Portal.Type.Cliff) return;
 
-        Plugin.Log.LogInfo("[AP] Portal destroyed → Checking progressive sequence...");
-        APHelper.SendNextProgressiveCheck("Destroy Portal Progressive", 23);
+        APCheckTracker.QueuePortalCheck(__instance);
     }
 }
 
@@ -537,14 +536,43 @@ public static class APCheckTracker
     private static ProgressHelper progressHelper;
     private static int[,] islandPeaks = new int[5, 9];
     private static ConfigEntry<string> savedPeaks;
-    private static readonly HashSet<int> SentLocationIds = new();
+    private static ConfigEntry<string> savedLocations;
+    private static readonly HashSet<long> KnownCheckedLocationIds = new();
+    private static readonly HashSet<long> LocationsBeingSent = new();
+    private static readonly List<(string sceneName, int island, float dueAt)> PendingPortalChecks = new();
 
     public static void SetProgressHelper(ProgressHelper helper) => progressHelper = helper;
+
+    public static void QueuePortalCheck(Portal portal)
+    {
+        if (portal == null) return;
+        int island = CurrentIslandIndex();
+        if (island < 0 || island >= 5) return;
+        PendingPortalChecks.Add((portal.gameObject.scene.name, island, Time.time + 1.5f));
+    }
+
+    public static void ProcessPendingPortalChecks()
+    {
+        for (int i = PendingPortalChecks.Count - 1; i >= 0; i--)
+        {
+            var check = PendingPortalChecks[i];
+            if (Time.time < check.dueAt) continue;
+            PendingPortalChecks.RemoveAt(i);
+            Scene activeScene = SceneManager.GetActiveScene();
+            if (!activeScene.IsValid() || !activeScene.isLoaded
+                || activeScene.name != check.sceneName || CurrentIslandIndex() != check.island) continue;
+            Plugin.Log.LogInfo("[AP] Portal destruction confirmed after the island scene remained active.");
+            APHelper.SendNextProgressiveCheck("Destroy Portal Progressive", 23);
+        }
+    }
 
     public static void LoadProgress()
     {
         updateCounter = 0;
-        SentLocationIds.Clear();
+        KnownCheckedLocationIds.Clear();
+        LocationsBeingSent.Clear();
+        PendingPortalChecks.Clear();
+        Array.Clear(islandPeaks, 0, islandPeaks.Length);
         string seed = "unknown";
         try
         {
@@ -558,10 +586,15 @@ public static class APCheckTracker
             .Where(char.IsLetterOrDigit).ToArray());
         savedPeaks = Plugin.Instance.Config.Bind("AP Check Progress", "IslandPeaks_" + safeKey,
             string.Join(",", Enumerable.Repeat("0", 45)));
+        savedLocations = Plugin.Instance.Config.Bind("AP Check Progress", "CheckedLocations_" + safeKey, "");
         string[] values = savedPeaks.Value.Split(',');
         for (int i = 0; i < 45; i++)
             if (i < values.Length && int.TryParse(values[i], out int value))
                 islandPeaks[i / 9, i % 9] = Math.Max(0, value);
+        foreach (string value in savedLocations.Value.Split(','))
+            if (long.TryParse(value, out long locationId) && locationId >= 0)
+                KnownCheckedLocationIds.Add(locationId);
+        ImportServerCheckedLocations();
         Plugin.Instance.Config.Save();
     }
 
@@ -578,9 +611,19 @@ public static class APCheckTracker
         if (peasantType != null)
         {
             var peasants = UnityEngine.Object.FindObjectsOfType(peasantType, true);
-            if (peasants != null) residents += peasants.Length;
+            int currentScene = kingdom.gameObject.scene.handle;
+            if (peasants != null)
+                for (int i = 0; i < peasants.Length; i++)
+                {
+                    try
+                    {
+                        var peasant = Il2CppObjectPool.Get<Component>(peasants[i].Pointer);
+                        if (peasant != null && peasant.gameObject.scene.handle == currentScene)
+                            residents++;
+                    }
+                    catch { }
+                }
         }
-
         int ironKnights = CountIronKnights(kingdom);
         int allKnights = kingdom.Knights?.Count ?? 0;
         int[] current =
@@ -607,8 +650,11 @@ public static class APCheckTracker
         for (int category = 0; category < Plugin.MilestoneFamilies.Length; category++)
         {
             if (!Plugin.MilestoneChecksEnabled[category]) continue;
+            // Use the highest island peak. Adding island populations together
+            // makes returning to an island award milestones for residents who
+            // are no longer present there.
             int totalPeak = 0;
-            for (int i = 0; i < 5; i++) totalPeak += islandPeaks[i, category];
+            for (int i = 0; i < 5; i++) totalPeak = Math.Max(totalPeak, islandPeaks[i, category]);
             foreach (int threshold in Plugin.MilestoneThresholds[category])
                 if (totalPeak >= threshold)
                     CompleteLocationIfNeeded($"{Plugin.MilestoneFamilies[category]} {threshold}");
@@ -629,11 +675,45 @@ public static class APCheckTracker
         return checkedLocations != null && checkedLocations.Contains(locationId);
     }
 
+    public static bool IsLocationRecorded(long locationId) => KnownCheckedLocationIds.Contains(locationId);
+
+    public static bool TryBeginLocationCheck(long locationId)
+    {
+        ImportServerCheckedLocations();
+        if (locationId < 0 || KnownCheckedLocationIds.Contains(locationId)) return false;
+        return LocationsBeingSent.Add(locationId);
+    }
+
+    public static void ConfirmLocationCheckSent(long locationId)
+    {
+        LocationsBeingSent.Remove(locationId);
+        if (KnownCheckedLocationIds.Add(locationId)) SaveCheckedLocations();
+    }
+
+    public static void CancelLocationCheckSend(long locationId) => LocationsBeingSent.Remove(locationId);
+
+    public static void ImportServerCheckedLocations()
+    {
+        if (savedLocations == null) return;
+        bool changed = false;
+        foreach (int locationId in APIDRegistry.All.Values)
+            if (IsLocationChecked(locationId) && KnownCheckedLocationIds.Add(locationId))
+                changed = true;
+        if (changed) SaveCheckedLocations();
+    }
+
+    private static void SaveCheckedLocations()
+    {
+        if (savedLocations == null) return;
+        savedLocations.Value = string.Join(",", KnownCheckedLocationIds.OrderBy(id => id));
+        Plugin.Instance.Config.Save();
+    }
+
     public static void CompleteLocationIfNeeded(string locationName)
     {
         if (Plugin.AP?.Connected != true || Plugin.AP.Session == null) return;
         int locationId = APIDRegistry.Get(locationName);
-        if (locationId < 0 || IsLocationChecked(locationId) || !SentLocationIds.Add(locationId)) return;
+        if (locationId < 0 || IsLocationChecked(locationId) || IsLocationRecorded(locationId)) return;
         Plugin.AP.CompleteLocation(locationId);
     }
 
@@ -819,6 +899,7 @@ public static class APHelper
         }
 
         var checkedLocations = Plugin.AP.Session.Locations.AllLocationsChecked;
+        APCheckTracker.ImportServerCheckedLocations();
 
         for (int i = 1; i <= count; i++)
         {
@@ -830,7 +911,7 @@ public static class APHelper
                 continue;
             }
 
-            if (!checkedLocations.Contains(id))
+            if (!checkedLocations.Contains(id) && !APCheckTracker.IsLocationRecorded(id))
             {
                 Plugin.Log.LogInfo($"[AP] Next unchecked location found: {locName} ({id})");
                 return id;
@@ -1643,6 +1724,7 @@ public class KeyHandler : MonoBehaviour
 
     private void Update()
     {
+        APCheckTracker.ProcessPendingPortalChecks();
         Archipelago.APConnection.ProcessPendingItems();
         Archipelago.APConnection.ProcessPendingDeathLinks();
 
