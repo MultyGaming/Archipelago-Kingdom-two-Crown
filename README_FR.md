@@ -8,11 +8,16 @@ Intégration Archipelago pour **Kingdom Two Crowns**.
 
 - Kingdom Two Crowns **2.4.3**, Windows x64
 - Archipelago **0.6.8** (version minimale requise par cet APWorld)
-- Plugin du mod **0.3.6**
-- APWorld **0.3.2**
+- Plugin du mod **0.3.7**
+- APWorld **0.3.3**
 - BepInEx **6.0.0-be.753**, Unity IL2CPP, Windows x64
 
 La version de base testée est BepInEx **6.0.0-be.753**. Le jeu ne démarrait pas avec le seul contenu officiel de cette version dans notre installation de test. `PatchAK2C.zip` fournit donc un ensemble `core` et `patchers` issu du modpack fonctionnel, qui remplace les fichiers correspondants et permet au jeu de démarrer dans cette configuration. Ce zip n’est pas une installation BepInEx autonome : installe d’abord l’archive officielle `.753`.
+
+
+## Notes de version
+
+Consulte les [notes de version 0.3.7](RELEASE_NOTES-0.3.7.md).
 
 ## Contenu du dépôt
 
@@ -62,3 +67,5 @@ Après le lancement, consulte `BepInEx/LogOutput.log`. Pour signaler un problèm
 ## Composants tiers
 
 BepInEx est un projet séparé distribué sous licence LGPL-2.1. `PatchAK2C.zip` redistribue les fichiers BepInEx `core` et le patcher de gestionnaire de configuration provenant du modpack de test ; installe d’abord la base officielle `.753`. Les DLL de dépendances incluses conservent leurs licences respectives ; voir [THIRD_PARTY.md](THIRD_PARTY.md).
+
+

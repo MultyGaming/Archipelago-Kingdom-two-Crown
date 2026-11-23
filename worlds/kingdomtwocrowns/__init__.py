@@ -66,6 +66,10 @@ class KingdomTwoCrownsWorld(World):
         for name in island5:
             set_rule(mw.get_location(name, p), lambda state: has_iron_tier(state, p, 7))
 
+        # The Norse Lands blue wolf is found on campaign island 6.
+        set_rule(mw.get_location("Norselands Island 6 Wolf Unlocks", p),
+                 lambda state: state.can_reach(mw.get_location("Island 5 Liberation", p)))
+
         if self.options.lighthouse_checks.value or self.options.goal in (
                 Goal.option_build_all_lighthouses, Goal.option_build_lighthouses):
             for island in range(1, 6):
@@ -150,7 +154,7 @@ class KingdomTwoCrownsWorld(World):
         return KTCItem(name, classification, item_table[name], self.player)
 
     def get_filler_item_name(self) -> str:
-        return "Gold Coin"
+        return "Single Gold Coin"
 
     def create_items(self):
         progression_items = {
@@ -169,7 +173,7 @@ class KingdomTwoCrownsWorld(World):
         missing_items = len(self.multiworld.get_locations(self.player)) - 1 - len(items)
         if missing_items < 0:
             raise ValueError("The selected currency item counts exceed the available locations.")
-        items += [self.create_item("Gold Coin") for _ in range(missing_items)]
+        items += [self.create_item("Single Gold Coin") for _ in range(missing_items)]
         self.multiworld.itempool += items
 
 

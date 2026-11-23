@@ -50,7 +50,7 @@ item_table = {
     "Iron Technology": 755176,
 
     "Random Game Effect (junk)": 755177,
-    "Gold Coin": 755303,
+    "Single Gold Coin": 755303,
     "Gold Pouch": 755300,
     "Gem Pack": 755301,
     "Victory": 755302,

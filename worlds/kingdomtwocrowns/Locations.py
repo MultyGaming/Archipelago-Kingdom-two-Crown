@@ -74,7 +74,7 @@ location_table = {
     "Horse Burst Unlocks": 755145,
     "Rainbow Pony Unlocks": 755146,
     "Warhorse Plague P1 Unlocks": 755147,
-    "Wolf Norselands P1 Unlocks": 755148,
+    "Norselands Island 6 Wolf Unlocks": 755148,
     "Unicorn Dark Unlocks": 755149,
 
     # Status Unlocks

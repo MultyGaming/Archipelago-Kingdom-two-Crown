@@ -285,7 +285,7 @@ public class SteedPayPatch
         "Horse Burst Unlocks",
         "Rainbow Pony Unlocks",
         "Warhorse Plague P1 Unlocks",
-        "Wolf Norselands P1 Unlocks",
+        "Norselands Island 6 Wolf Unlocks",
         "Unicorn Dark Unlocks"
     };
 
@@ -298,7 +298,10 @@ public class SteedPayPatch
 
             foreach (var unlockName in SteedUnlockNames)
             {
-                if (steed.name.Contains(unlockName.Replace(" Unlocks", ""), StringComparison.OrdinalIgnoreCase))
+                string steedName = unlockName == "Norselands Island 6 Wolf Unlocks"
+                    ? "Wolf Norselands P1"
+                    : unlockName.Replace(" Unlocks", "");
+                if (steed.name.Contains(steedName, StringComparison.OrdinalIgnoreCase))
                 {
                     var id = APIDRegistry.Get(unlockName);
                     if (id != -1)
@@ -317,12 +320,13 @@ public class SteedPayPatch
     }
 }
 
-[HarmonyPatch(typeof(Chest), "ReceiveOpenCall")]
+[HarmonyPatch(typeof(Chest), "ReceiveCompleteCall")]
 public class ChestOpenPatch
 {
     static void Postfix(Chest __instance)
     {
         if (!Plugin.APconnected) return;
+        // A completed opening/spill is a better signal than the initial open request.
         if (__instance.currencyType == CurrencyType.Coins)
         {
             APHelper.SendNextProgressiveCheck("Progressive Coin Chest", 9);
@@ -488,7 +492,7 @@ public class StatueOnPayPatch
 [HarmonyPatch(typeof(Kingdom), "Update")]
 public class KingdomUpdatePatch
 {
-    static void Prefix(Kingdom __instance)
+    static void Postfix(Kingdom __instance)
     {
         if (!Plugin.APconnected) return;
         APCheckTracker.Update(__instance);
@@ -892,7 +896,7 @@ public static class APHelper
 {
     public static int? GetNextUncheckedLocation(string baseName, int count)
     {
-        if (Plugin.AP?.Session?.Locations.AllLocationsChecked == null)
+        if (Plugin.AP?.Session == null)
         {
             Plugin.Log.LogWarning("[AP] Session or location data not ready.");
             return null;
@@ -911,7 +915,8 @@ public static class APHelper
                 continue;
             }
 
-            if (!checkedLocations.Contains(id) && !APCheckTracker.IsLocationRecorded(id))
+            if ((checkedLocations == null || !checkedLocations.Contains(id))
+                && !APCheckTracker.IsLocationRecorded(id))
             {
                 Plugin.Log.LogInfo($"[AP] Next unchecked location found: {locName} ({id})");
                 return id;
@@ -1128,7 +1133,7 @@ public static class APIDsRegisterClass
         APIDRegistry.AddNew("Horse Burst Unlocks", 755145);                     //Location  1
         APIDRegistry.AddNew("Rainbow Pony Unlocks", 755146);                    //Location  1
         APIDRegistry.AddNew("Warhorse Plague P1 Unlocks", 755147);              //Location  1  
-        APIDRegistry.AddNew("Wolf Norselands P1 Unlocks", 755148);              //Location  1  
+        APIDRegistry.AddNew("Norselands Island 6 Wolf Unlocks", 755148);        //Location  1  
         APIDRegistry.AddNew("Unicorn Dark Unlocks", 755149);                    //Location  1
 
         APIDRegistry.AddNew("Bear Use", 755150);                                //Items     1
@@ -1168,7 +1173,7 @@ public static class APIDsRegisterClass
         APIDRegistry.AddNew("Gold Pouch", 755300);                              //Random 5-10 coins
         APIDRegistry.AddNew("Gem Pack", 755301);                                //Random 1-3 gems
         APIDRegistry.AddNew("Victory", 755302);                                //Goal item
-        APIDRegistry.AddNew("Gold Coin", 755303);                              //Filler coin
+        APIDRegistry.AddNew("Single Gold Coin", 755303);                       //Filler: one coin
 
         int[] hermitUseIds = { 755097, 755099, 755101, 755103, 755105 };
         int[] mountUseIds = { 755150, 755151, 755152, 755153, 755154, 755155, 755156, 755157, 755158, 755159, 755160, 755161, 755162, 755163, 755164, 755165, 755166 };
