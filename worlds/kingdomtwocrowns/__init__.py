@@ -66,9 +66,8 @@ class KingdomTwoCrownsWorld(World):
         for name in island5:
             set_rule(mw.get_location(name, p), lambda state: has_iron_tier(state, p, 7))
 
-        # The Norse Lands blue wolf is found on campaign island 6.
-        set_rule(mw.get_location("Norselands Island 6 Wolf Unlocks", p),
-                 lambda state: state.can_reach(mw.get_location("Island 5 Liberation", p)))
+        # The Blue Wolf location is checked in-game when its mount is purchased;
+        # it is not gated on liberating Island 5 in Archipelago logic.
 
         if self.options.lighthouse_checks.value or self.options.goal in (
                 Goal.option_build_all_lighthouses, Goal.option_build_lighthouses):
@@ -219,3 +218,6 @@ class PlandoItem(NamedTuple):
             logging.warning(warning)
         else:
             logging.debug(warning)
+
+
+

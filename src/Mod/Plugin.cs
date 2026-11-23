@@ -266,6 +266,17 @@ public class Plugin : BasePlugin
 
 
 [HarmonyPatch(typeof(SteedSpawn), "Pay")]
+public class SteedSpawnPayBlockPatch
+{
+    static void Postfix(SteedSpawn __instance)
+    {
+        if (!Plugin.APconnected || __instance == null) return;
+        foreach (var steed in __instance.steeds)
+            steed.forceBlockPayment = true;
+    }
+}
+
+[HarmonyPatch(typeof(Steed), "Pay")]
 public class SteedPayPatch
 {
     static readonly string[] SteedUnlockNames =
@@ -289,33 +300,29 @@ public class SteedPayPatch
         "Unicorn Dark Unlocks"
     };
 
-    static void Postfix(SteedSpawn __instance)
+    static void Postfix(Steed __instance)
     {
-        if (!Plugin.APconnected) return;
-        foreach (var steed in __instance.steeds)
-        {
-            steed.forceBlockPayment = true;
+        if (!Plugin.APconnected || __instance == null) return;
 
-            foreach (var unlockName in SteedUnlockNames)
+        foreach (var unlockName in SteedUnlockNames)
+        {
+            string steedName = unlockName == "Norselands Island 6 Wolf Unlocks"
+                ? "Wolf Norselands P1"
+                : unlockName.Replace(" Unlocks", "");
+            if (!__instance.name.Contains(steedName, StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            var id = APIDRegistry.Get(unlockName);
+            if (id != -1)
             {
-                string steedName = unlockName == "Norselands Island 6 Wolf Unlocks"
-                    ? "Wolf Norselands P1"
-                    : unlockName.Replace(" Unlocks", "");
-                if (steed.name.Contains(steedName, StringComparison.OrdinalIgnoreCase))
-                {
-                    var id = APIDRegistry.Get(unlockName);
-                    if (id != -1)
-                    {
-                        Plugin.AP?.CompleteLocation(id);
-                        Plugin.Log.LogInfo($"[AP] Steed '{steed.name}' → Completed location '{unlockName}' (ID {id})");
-                    }
-                    else
-                    {
-                        Plugin.Log.LogWarning($"[AP] No registry entry found for '{unlockName}'");
-                    }
-                    break;
-                }
+                Plugin.AP?.CompleteLocation(id);
+                Plugin.Log.LogInfo($"[AP] Purchased steed '{__instance.name}' → Completed location '{unlockName}' (ID {id})");
             }
+            else
+            {
+                Plugin.Log.LogWarning($"[AP] No registry entry found for '{unlockName}'");
+            }
+            return;
         }
     }
 }
@@ -1899,3 +1906,5 @@ public static class JsonHelper
         return (string)SerializeMethod.Invoke(null, new object[] { obj });
     }
 }
+
+
