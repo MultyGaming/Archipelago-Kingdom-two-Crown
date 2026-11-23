@@ -17,7 +17,7 @@ La version de base testée est BepInEx **6.0.0-be.753**. Le jeu ne démarrait pa
 
 ## Notes de version
 
-Consulte les [notes de version 0.3.7](RELEASE_NOTES-0.3.7.md).
+Consulte les [notes de version](RELEASE_NOTES-EN-FR.md).
 
 ## Contenu du dépôt
 
@@ -67,5 +67,6 @@ Après le lancement, consulte `BepInEx/LogOutput.log`. Pour signaler un problèm
 ## Composants tiers
 
 BepInEx est un projet séparé distribué sous licence LGPL-2.1. `PatchAK2C.zip` redistribue les fichiers BepInEx `core` et le patcher de gestionnaire de configuration provenant du modpack de test ; installe d’abord la base officielle `.753`. Les DLL de dépendances incluses conservent leurs licences respectives ; voir [THIRD_PARTY.md](THIRD_PARTY.md).
+
 
 
